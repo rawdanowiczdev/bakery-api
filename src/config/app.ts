@@ -2,12 +2,12 @@ import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 
-import dotenv from "dotenv";
-dotenv.config();
-
 import breadsRoutes from "../routes/breads-routes";
 import testRoutes from "../routes/test-routes";
 import commonRoutes from "../routes/common-routes";
+
+import dotenv from "dotenv";
+dotenv.config();
 
 class App {
   app = express();
@@ -19,7 +19,7 @@ class App {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       })
-      .then(() => console.log("Connected to MongoDB"))
+      .then(() => console.log("---Connected to MongoDB---"))
       .catch((err: Error) => console.log(err));
     this.config();
     this.routes();
@@ -28,6 +28,15 @@ class App {
   private config(): void {
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: false }));
+    this.app.use((req, res, next) => {
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST");
+      res.setHeader(
+        "Access-Control-Allow-Headers",
+        "Content-Type, Authorization"
+      );
+      next();
+    });
   }
 
   private routes(): void {

@@ -4,7 +4,7 @@ import { Bread } from "../models/bread-model";
 
 class BreadsController {
   getHandler: RequestHandler = (req, res, next) => {
-    Bread.find((err: CallbackError, breads: string[]) => {
+    Bread.find((err: CallbackError, breads: Array<{}>) => {
       if (err) {
         res.status(500).json({ error: `${err}` });
       }
