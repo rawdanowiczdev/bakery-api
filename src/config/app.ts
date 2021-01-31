@@ -13,15 +13,19 @@ class App {
   mongoDB = process.env.MONGODB_URI as string;
 
   constructor() {
+    this.database();
+    this.config();
+    this.routes();
+  }
+
+  private database(): void {
     mongoose
       .connect(this.mongoDB, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       })
-      .then(() => console.log("---Connected to MongoDB---"))
+      .then(() => console.log("> Connected to MongoDB"))
       .catch((err: Error) => console.log(err));
-    this.config();
-    this.routes();
   }
 
   private config(): void {
