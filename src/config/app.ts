@@ -3,7 +3,6 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 
 import breadsRoutes from "../routes/breads-routes";
-import testRoutes from "../routes/test-routes";
 import commonRoutes from "../routes/common-routes";
 
 import dotenv from "dotenv";
@@ -41,7 +40,6 @@ class App {
 
   private routes(): void {
     this.app.use("/breads", breadsRoutes);
-    this.app.use("/test", testRoutes);
     this.app.use("", commonRoutes);
   }
 }
