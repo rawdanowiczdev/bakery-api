@@ -1,9 +1,9 @@
-import express from "express";
+import { Router } from "express";
 
 import commonController from "../controllers/common-controller";
 
 class CommonRoutes {
-  router = express.Router();
+  router = Router();
 
   constructor() {
     this.notFound();

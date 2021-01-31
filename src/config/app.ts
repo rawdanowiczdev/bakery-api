@@ -1,15 +1,14 @@
 import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
+import { config } from "dotenv";
 
 import breadsRoutes from "../routes/breads-routes";
 import commonRoutes from "../routes/common-routes";
 
-import dotenv from "dotenv";
-dotenv.config();
-
 class App {
   app = express();
+  dotenv = config();
   mongoDB = process.env.MONGODB_URI as string;
 
   constructor() {
@@ -33,11 +32,12 @@ class App {
     this.app.use(bodyParser.urlencoded({ extended: false }));
     this.app.use((req, res, next) => {
       res.setHeader("Access-Control-Allow-Origin", "*");
-      res.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST");
       res.setHeader(
         "Access-Control-Allow-Headers",
         "Content-Type, Authorization"
       );
+      res.setHeader("Access-Control-Allow-Methods", "OPTIONS, GET, POST");
+
       next();
     });
   }
