@@ -1,7 +1,7 @@
 {
-  "name": "rest",
+  "name": "bakery-api",
   "version": "1.0.0",
-  "description": "Simple REST API with MongoDB.",
+  "description": "Simple REST API with MongoDB. Get your favorite bread, rolls and more!",
   "main": "./dist/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
