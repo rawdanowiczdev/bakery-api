@@ -1,12 +1,21 @@
-import mongoose from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 
-const rollSchema = new mongoose.Schema(
-  {
-    name: String,
-    description: String,
-    imageURL: String,
-  },
-  { versionKey: false }
+export interface Roll {
+  _id: ObjectId;
+  name: string;
+  description: string;
+  grains: string[];
+  imageURL: string;
+}
+
+export const RollModel = mongoose.model(
+  "Roll",
+  new mongoose.Schema(
+    {
+      name: String,
+      description: String,
+      imageURL: String,
+    },
+    { versionKey: false }
+  )
 );
-
-export const Roll = mongoose.model("Roll", rollSchema);
