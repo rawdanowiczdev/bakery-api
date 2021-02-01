@@ -10,7 +10,13 @@ class RollsController {
 
     if (rollID) {
       RollModel.findById(rollID)
-        .then((roll: Roll) => res.status(200).json(roll))
+        .then((roll: Roll) => {
+          if (roll) {
+            res.status(200).json(roll);
+          } else {
+            res.status(404).json({ error: "Object doesn't exist.", rollID });
+          }
+        })
         .catch((err: CallbackError) =>
           res.status(500).json({ error: `${err}` })
         );
@@ -54,6 +60,22 @@ class RollsController {
     } else {
       return res.status(422).json({ errors: errors.array() });
     }
+  };
+
+  deleteHandler: RequestHandler = (req, res, next) => {
+    const rollID = { _id: req.params.rollID };
+
+    RollModel.findByIdAndDelete(rollID)
+      .then((roll: Roll) => {
+        if (roll) {
+          res.status(200).json({ message: "Deleted successfully.", ...rollID });
+        } else {
+          res.status(404).json({ error: "Object doesn't exist.", ...rollID });
+        }
+      })
+      .catch((err: CallbackError) => {
+        res.status(500).json({ error: `${err}` });
+      });
   };
 }
 

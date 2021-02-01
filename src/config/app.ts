@@ -38,7 +38,7 @@ class App {
       );
       res.setHeader(
         "Access-Control-Allow-Methods",
-        "OPTIONS, GET, POST, PATCH"
+        "OPTIONS, GET, POST, PATCH, DELETE"
       );
 
       next();

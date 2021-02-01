@@ -10,6 +10,7 @@ class BreadsRoutes {
     this.get();
     this.post();
     this.patch();
+    this.delete();
   }
 
   get(): void {
@@ -39,6 +40,10 @@ class BreadsRoutes {
         .optional(),
       breadsController.patchHandler
     );
+  }
+
+  delete(): void {
+    this.router.delete("/:breadID", breadsController.deleteHandler);
   }
 }
 

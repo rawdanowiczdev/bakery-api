@@ -10,7 +10,13 @@ class BreadsController {
 
     if (breadID) {
       BreadModel.findById(breadID)
-        .then((bread: Bread) => res.status(200).json(bread))
+        .then((bread: Bread) => {
+          if (bread) {
+            res.status(200).json(bread);
+          } else {
+            res.status(404).json({ error: "Object doesn't exist.", breadID });
+          }
+        })
         .catch((err: CallbackError) =>
           res.status(500).json({ error: `${err}` })
         );
@@ -54,6 +60,24 @@ class BreadsController {
     } else {
       return res.status(422).json({ errors: errors.array() });
     }
+  };
+
+  deleteHandler: RequestHandler = (req, res, next) => {
+    const breadID = { _id: req.params.breadID };
+
+    BreadModel.findByIdAndDelete(breadID)
+      .then((bread: Bread) => {
+        if (bread) {
+          res
+            .status(200)
+            .json({ message: "Deleted successfully.", ...breadID });
+        } else {
+          res.status(404).json({ error: "Object doesn't exist.", ...breadID });
+        }
+      })
+      .catch((err: CallbackError) => {
+        res.status(500).json({ error: `${err}` });
+      });
   };
 }
 
