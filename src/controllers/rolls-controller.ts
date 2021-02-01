@@ -9,21 +9,17 @@ class RollsController {
     const rollID = req.params.rollID;
 
     if (rollID) {
-      RollModel.findById(rollID, (err: CallbackError, roll: Roll) => {
-        if (err) {
-          res.status(500).json({ error: `${err}` });
-        }
-
-        res.status(200).json(roll);
-      });
+      RollModel.findById(rollID)
+        .then((roll: Roll) => res.status(200).json(roll))
+        .catch((err: CallbackError) =>
+          res.status(500).json({ error: `${err}` })
+        );
     } else {
-      RollModel.find((err: CallbackError, rolls: Roll[]) => {
-        if (err) {
-          res.status(500).json({ error: `${err}` });
-        }
-
-        res.status(200).json(rolls);
-      });
+      RollModel.find()
+        .then((rolls: Roll[]) => res.status(200).json(rolls))
+        .catch((err: CallbackError) =>
+          res.status(500).json({ error: `${err}` })
+        );
     }
   };
 
@@ -31,17 +27,16 @@ class RollsController {
     const roll = new RollModel(req.body);
     const errors = validationResult(req);
 
-    if (!errors.isEmpty()) {
+    if (errors.isEmpty()) {
+      roll
+        .save()
+        .then((roll) => res.status(201).json(roll))
+        .catch((err: CallbackError) => {
+          res.status(500).json({ error: `${err}` });
+        });
+    } else {
       return res.status(422).json({ errors: errors.array() });
     }
-
-    roll.save((err: CallbackError) => {
-      if (err) {
-        res.status(500).json({ error: `${err}` });
-      }
-
-      res.status(201).json(roll);
-    });
   };
 }
 

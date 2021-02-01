@@ -9,21 +9,17 @@ class BreadsController {
     const breadID = req.params.breadID;
 
     if (breadID) {
-      BreadModel.findById(breadID, (err: CallbackError, bread: Bread) => {
-        if (err) {
-          res.status(500).json({ error: `${err}` });
-        }
-
-        res.status(200).json(bread);
-      });
+      BreadModel.findById(breadID)
+        .then((bread: Bread) => res.status(200).json(bread))
+        .catch((err: CallbackError) =>
+          res.status(500).json({ error: `${err}` })
+        );
     } else {
-      BreadModel.find((err: CallbackError, breads: Bread[]) => {
-        if (err) {
-          res.status(500).json({ error: `${err}` });
-        }
-
-        res.status(200).json(breads);
-      });
+      BreadModel.find()
+        .then((breads: Bread[]) => res.status(200).json(breads))
+        .catch((err: CallbackError) =>
+          res.status(500).json({ error: `${err}` })
+        );
     }
   };
 
@@ -31,17 +27,16 @@ class BreadsController {
     const bread = new BreadModel(req.body);
     const errors = validationResult(req);
 
-    if (!errors.isEmpty()) {
+    if (errors.isEmpty()) {
+      bread
+        .save()
+        .then((bread) => res.status(201).json(bread))
+        .catch((err: CallbackError) => {
+          res.status(500).json({ error: `${err}` });
+        });
+    } else {
       return res.status(422).json({ errors: errors.array() });
     }
-
-    bread.save((err: CallbackError) => {
-      if (err) {
-        res.status(500).json({ error: `${err}` });
-      }
-
-      res.status(201).json(bread);
-    });
   };
 }
 
