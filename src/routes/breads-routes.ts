@@ -13,6 +13,7 @@ class BreadsRoutes {
 
   get(): void {
     this.router.get("/", breadsController.getHandler);
+    this.router.get("/:breadID", breadsController.getHandler);
   }
 
   post(): void {

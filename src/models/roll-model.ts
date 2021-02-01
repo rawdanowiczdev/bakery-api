@@ -4,7 +4,6 @@ export interface Roll {
   _id: ObjectId;
   name: string;
   description: string;
-  grains: string[];
   imageURL: string;
 }
 

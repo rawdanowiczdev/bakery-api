@@ -6,13 +6,25 @@ import { Bread, BreadModel } from "../models/bread-model";
 
 class BreadsController {
   getHandler: RequestHandler = (req, res, next) => {
-    BreadModel.find((err: CallbackError, breads: Bread[]) => {
-      if (err) {
-        res.status(500).json({ error: `${err}` });
-      }
+    const breadID = req.params.breadID;
 
-      res.status(200).json(breads);
-    });
+    if (breadID) {
+      BreadModel.findById(breadID, (err: CallbackError, bread: Bread) => {
+        if (err) {
+          res.status(500).json({ error: `${err}` });
+        }
+
+        res.status(200).json(bread);
+      });
+    } else {
+      BreadModel.find((err: CallbackError, breads: Bread[]) => {
+        if (err) {
+          res.status(500).json({ error: `${err}` });
+        }
+
+        res.status(200).json(breads);
+      });
+    }
   };
 
   postHandler: RequestHandler = (req, res, next) => {

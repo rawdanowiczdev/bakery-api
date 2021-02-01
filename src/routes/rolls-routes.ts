@@ -13,6 +13,7 @@ class RollsRoutes {
 
   get(): void {
     this.router.get("/", rollsController.getHandler);
+    this.router.get("/:rollID", rollsController.getHandler);
   }
 
   post(): void {
