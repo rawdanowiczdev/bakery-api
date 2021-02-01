@@ -1,4 +1,5 @@
 import { RequestHandler } from "express";
+import { validationResult } from "express-validator";
 import { CallbackError } from "mongoose";
 
 import { Bread, BreadModel } from "../models/bread-model";
@@ -16,6 +17,11 @@ class BreadsController {
 
   postHandler: RequestHandler = (req, res, next) => {
     const bread = new BreadModel(req.body);
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
 
     bread.save((err: CallbackError) => {
       if (err) {

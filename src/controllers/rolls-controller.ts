@@ -1,4 +1,5 @@
 import { RequestHandler } from "express";
+import { validationResult } from "express-validator";
 import { CallbackError } from "mongoose";
 
 import { Roll, RollModel } from "../models/roll-model";
@@ -16,6 +17,11 @@ class RollsController {
 
   postHandler: RequestHandler = (req, res, next) => {
     const roll = new RollModel(req.body);
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
 
     roll.save((err: CallbackError) => {
       if (err) {
