@@ -9,6 +9,7 @@ class BreadsRoutes {
   constructor() {
     this.get();
     this.post();
+    this.patch();
   }
 
   get(): void {
@@ -24,6 +25,19 @@ class BreadsRoutes {
       body("grains").isArray({ min: 1, max: 10 }),
       body("imageURL").isURL({ protocols: ["https"] }),
       breadsController.postHandler
+    );
+  }
+
+  patch(): void {
+    this.router.patch(
+      "/:breadID",
+      body("name").trim().isLength({ min: 3, max: 30 }).optional(),
+      body("description").trim().isLength({ min: 5, max: 500 }).optional(),
+      body("grains").isArray({ min: 1, max: 10 }).optional(),
+      body("imageURL")
+        .isURL({ protocols: ["https"] })
+        .optional(),
+      breadsController.patchHandler
     );
   }
 }

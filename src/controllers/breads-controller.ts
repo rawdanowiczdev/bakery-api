@@ -38,6 +38,23 @@ class BreadsController {
       return res.status(422).json({ errors: errors.array() });
     }
   };
+
+  patchHandler: RequestHandler = (req, res, next) => {
+    const breadID = { _id: req.params.breadID };
+    const errors = validationResult(req);
+
+    if (errors.isEmpty()) {
+      BreadModel.findOneAndUpdate(breadID, req.body, {
+        useFindAndModify: false,
+      })
+        .then(() => res.status(201).json({ ...breadID, ...req.body }))
+        .catch((err: CallbackError) => {
+          res.status(500).json({ error: `${err}` });
+        });
+    } else {
+      return res.status(422).json({ errors: errors.array() });
+    }
+  };
 }
 
 export default new BreadsController();

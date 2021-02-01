@@ -38,6 +38,23 @@ class RollsController {
       return res.status(422).json({ errors: errors.array() });
     }
   };
+
+  patchHandler: RequestHandler = (req, res, next) => {
+    const rollID = { _id: req.params.rollID };
+    const errors = validationResult(req);
+
+    if (errors.isEmpty()) {
+      RollModel.findOneAndUpdate(rollID, req.body, {
+        useFindAndModify: false,
+      })
+        .then(() => res.status(201).json({ ...rollID, ...req.body }))
+        .catch((err: CallbackError) => {
+          res.status(500).json({ error: `${err}` });
+        });
+    } else {
+      return res.status(422).json({ errors: errors.array() });
+    }
+  };
 }
 
 export default new RollsController();
