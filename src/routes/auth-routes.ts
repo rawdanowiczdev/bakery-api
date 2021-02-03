@@ -23,7 +23,7 @@ class AuthRoutes {
             }
           });
         }),
-      authController.postHandler
+      authController.signupHandler
     );
   }
 }

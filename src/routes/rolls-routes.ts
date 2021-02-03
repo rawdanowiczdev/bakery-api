@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { body } from "express-validator";
 
+import { isAuth } from "../config/auth";
 import rollsController from "../controllers/rolls-controller";
 
 class RollsRoutes {
@@ -21,6 +22,7 @@ class RollsRoutes {
   post(): void {
     this.router.post(
       "/",
+      isAuth,
       body("name").trim().isLength({ min: 3, max: 30 }),
       body("description").trim().isLength({ min: 5, max: 500 }),
       body("imageURL").isURL({ protocols: ["https"] }),
@@ -31,6 +33,7 @@ class RollsRoutes {
   patch(): void {
     this.router.patch(
       "/:rollID",
+      isAuth,
       body("name").trim().isLength({ min: 3, max: 30 }).optional(),
       body("description").trim().isLength({ min: 5, max: 500 }).optional(),
       body("imageURL")
@@ -41,7 +44,7 @@ class RollsRoutes {
   }
 
   delete(): void {
-    this.router.delete("/:rollID", rollsController.deleteHandler);
+    this.router.delete("/:rollID", isAuth, rollsController.deleteHandler);
   }
 }
 

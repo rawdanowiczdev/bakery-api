@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 import { UserModel } from "../models/user-model";
 
 class AuthController {
-  postHandler: RequestHandler = (req, res, next) => {
+  signupHandler: RequestHandler = (req, res, next) => {
     const user = new UserModel(req.body);
     const errors = validationResult(req);
 

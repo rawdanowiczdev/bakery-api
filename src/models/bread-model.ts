@@ -1,21 +1,23 @@
-import mongoose, { ObjectId } from "mongoose";
+import mongoose from "mongoose";
 
 export interface Bread {
-  _id: ObjectId;
+  _id: string;
   name: string;
   description: string;
   grains: string[];
   imageURL: string;
+  creator: string;
 }
 
 export const BreadModel = mongoose.model(
   "Bread",
   new mongoose.Schema(
     {
-      name: String,
-      description: String,
-      grains: Array,
-      imageURL: String,
+      name: { type: String, required: true },
+      description: { type: String, required: true },
+      grains: { type: Array, required: true },
+      imageURL: { type: String, required: true },
+      creator: { type: String, required: true },
     },
     { versionKey: false }
   )

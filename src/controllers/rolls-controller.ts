@@ -9,36 +9,38 @@ class RollsController {
     const rollID = req.params.rollID;
 
     if (rollID) {
-      RollModel.findById(rollID)
-        .then((roll: Roll) => {
-          if (roll) {
-            res.status(200).json(roll);
-          } else {
-            res.status(404).json({ error: "Object doesn't exist.", rollID });
-          }
-        })
-        .catch((err: CallbackError) =>
-          res.status(500).json({ error: `${err}` })
-        );
+      if (rollID.length === 24) {
+        RollModel.findById(rollID)
+          .then((roll: Roll) => {
+            if (roll) {
+              res.status(200).json(roll);
+            } else {
+              res.status(404).json({ error: "Object doesn't exist.", rollID });
+            }
+          })
+          .catch((err: CallbackError) => res.status(500).json({ error: err }));
+      } else {
+        res.status(404).json({ error: "Incorrect id format." });
+      }
     } else {
       RollModel.find()
         .then((rolls: Roll[]) => res.status(200).json(rolls))
-        .catch((err: CallbackError) =>
-          res.status(500).json({ error: `${err}` })
-        );
+        .catch((err: CallbackError) => res.status(500).json({ error: err }));
     }
   };
 
   postHandler: RequestHandler = (req, res, next) => {
-    const roll = new RollModel(req.body);
+    const roll = new RollModel({ ...req.body, creator: req.params.userID });
     const errors = validationResult(req);
 
     if (errors.isEmpty()) {
       roll
         .save()
-        .then((roll) => res.status(201).json(roll))
+        .then((roll) =>
+          res.status(201).json({ message: "Created successfully.", roll })
+        )
         .catch((err: CallbackError) => {
-          res.status(500).json({ error: `${err}` });
+          res.status(500).json({ error: err });
         });
     } else {
       return res.status(422).json({ errors: errors.array() });
@@ -50,13 +52,36 @@ class RollsController {
     const errors = validationResult(req);
 
     if (errors.isEmpty()) {
-      RollModel.findOneAndUpdate(rollID, req.body, {
-        useFindAndModify: false,
-      })
-        .then(() => res.status(201).json({ ...rollID, ...req.body }))
-        .catch((err: CallbackError) => {
-          res.status(500).json({ error: `${err}` });
+      if (rollID._id.length === 24) {
+        RollModel.findOne(rollID).then((roll: Roll) => {
+          if (roll) {
+            if (roll.creator === req.params.userID) {
+              RollModel.findOneAndUpdate(rollID, req.body, {
+                useFindAndModify: false,
+              })
+                .then(() => {
+                  res.status(201).json({
+                    message: "Updated successfully.",
+                    ...rollID,
+                    ...req.body,
+                  });
+                })
+                .catch((err: CallbackError) => {
+                  res.status(500).json({ error: err });
+                });
+            } else {
+              res.status(403).json({
+                error:
+                  "You are not allowed to modify objects of other creators.",
+              });
+            }
+          } else {
+            res.status(404).json({ error: "Object doesn't exist.", ...rollID });
+          }
         });
+      } else {
+        res.status(404).json({ error: "Incorrect id format." });
+      }
     } else {
       return res.status(422).json({ errors: errors.array() });
     }
@@ -65,17 +90,31 @@ class RollsController {
   deleteHandler: RequestHandler = (req, res, next) => {
     const rollID = { _id: req.params.rollID };
 
-    RollModel.findByIdAndDelete(rollID)
-      .then((roll: Roll) => {
+    if (rollID._id.length === 24) {
+      RollModel.findOne(rollID).then((roll: Roll) => {
         if (roll) {
-          res.status(200).json({ message: "Deleted successfully.", ...rollID });
+          if (roll.creator === req.params.userID) {
+            RollModel.findByIdAndDelete(rollID)
+              .then(() => {
+                res
+                  .status(200)
+                  .json({ message: "Deleted successfully.", ...rollID });
+              })
+              .catch((err: CallbackError) => {
+                res.status(500).json({ error: err });
+              });
+          } else {
+            res.status(403).json({
+              error: "You are not allowed to modify objects of other creators.",
+            });
+          }
         } else {
           res.status(404).json({ error: "Object doesn't exist.", ...rollID });
         }
-      })
-      .catch((err: CallbackError) => {
-        res.status(500).json({ error: `${err}` });
       });
+    } else {
+      res.status(404).json({ error: "Incorrect id format." });
+    }
   };
 }
 
