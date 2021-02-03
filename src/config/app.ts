@@ -4,6 +4,7 @@ import { config } from "dotenv";
 
 import breadsRoutes from "../routes/breads-routes";
 import rollsRoutes from "../routes/rolls-routes";
+import authRoutes from "../routes/auth-routes";
 import commonRoutes from "../routes/common-routes";
 
 class App {
@@ -48,6 +49,7 @@ class App {
   private routes(): void {
     this.app.use("/breads", breadsRoutes);
     this.app.use("/rolls", rollsRoutes);
+    this.app.use("/auth", authRoutes);
     this.app.use("", commonRoutes);
   }
 }
