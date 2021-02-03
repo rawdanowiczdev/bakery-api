@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { body } from "express-validator";
+import { body, param } from "express-validator";
 
 import { isAuth } from "../config/auth";
 import breadsController from "../controllers/breads-controller";
@@ -16,7 +16,11 @@ class BreadsRoutes {
 
   get(): void {
     this.router.get("/", breadsController.getHandler);
-    this.router.get("/:breadID", breadsController.getHandler);
+    this.router.get(
+      "/:breadID",
+      param("breadID").isLength({ min: 24, max: 24 }),
+      breadsController.getHandler
+    );
   }
 
   post(): void {
@@ -35,6 +39,7 @@ class BreadsRoutes {
     this.router.patch(
       "/:breadID",
       isAuth,
+      param("breadID").isLength({ min: 24, max: 24 }),
       body("name").trim().isLength({ min: 3, max: 30 }).optional(),
       body("description").trim().isLength({ min: 5, max: 500 }).optional(),
       body("grains").isArray({ min: 1, max: 10 }).optional(),
@@ -46,7 +51,12 @@ class BreadsRoutes {
   }
 
   delete(): void {
-    this.router.delete("/:breadID", isAuth, breadsController.deleteHandler);
+    this.router.delete(
+      "/:breadID",
+      isAuth,
+      param("breadID").isLength({ min: 24, max: 24 }),
+      breadsController.deleteHandler
+    );
   }
 }
 

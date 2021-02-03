@@ -26,7 +26,7 @@ class AuthController {
           res.status(500).json({ error: err });
         });
     } else {
-      return res.status(422).json({ errors: errors.array() });
+      return res.status(422).json({ errors: errors });
     }
   };
 }

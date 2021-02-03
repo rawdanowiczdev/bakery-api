@@ -4,10 +4,9 @@ import { User } from "../models/user-model";
 
 export const isAuth: RequestHandler = (req, res, next) => {
   const authHeader = req.get("Authorization");
+  let token: { user: User; iat: number } | any;
 
   if (authHeader) {
-    let token: { user: User; iat: number } | any;
-
     try {
       token = jtw.verify(
         authHeader.split(" ")[1],
@@ -24,6 +23,6 @@ export const isAuth: RequestHandler = (req, res, next) => {
   } else {
     res
       .status(401)
-      .json({ error: "Missing authorization token. Signup to get one." });
+      .json({ error: "Missing authorization token. Signup to create one." });
   }
 };

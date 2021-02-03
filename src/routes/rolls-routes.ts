@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { body } from "express-validator";
+import { body, param } from "express-validator";
 
 import { isAuth } from "../config/auth";
 import rollsController from "../controllers/rolls-controller";
@@ -16,7 +16,11 @@ class RollsRoutes {
 
   get(): void {
     this.router.get("/", rollsController.getHandler);
-    this.router.get("/:rollID", rollsController.getHandler);
+    this.router.get(
+      "/:rollID",
+      param("breadID").isLength({ min: 24, max: 24 }),
+      rollsController.getHandler
+    );
   }
 
   post(): void {
@@ -34,6 +38,7 @@ class RollsRoutes {
     this.router.patch(
       "/:rollID",
       isAuth,
+      param("breadID").isLength({ min: 24, max: 24 }),
       body("name").trim().isLength({ min: 3, max: 30 }).optional(),
       body("description").trim().isLength({ min: 5, max: 500 }).optional(),
       body("imageURL")
@@ -44,7 +49,12 @@ class RollsRoutes {
   }
 
   delete(): void {
-    this.router.delete("/:rollID", isAuth, rollsController.deleteHandler);
+    this.router.delete(
+      "/:rollID",
+      isAuth,
+      param("breadID").isLength({ min: 24, max: 24 }),
+      rollsController.deleteHandler
+    );
   }
 }
 

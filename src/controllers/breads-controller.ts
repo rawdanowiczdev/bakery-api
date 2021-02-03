@@ -9,19 +9,15 @@ class BreadsController {
     const breadID = req.params.breadID;
 
     if (breadID) {
-      if (breadID.length === 24) {
-        BreadModel.findById(breadID)
-          .then((bread: Bread) => {
-            if (bread) {
-              res.status(200).json(bread);
-            } else {
-              res.status(404).json({ error: "Object doesn't exist.", breadID });
-            }
-          })
-          .catch((err: CallbackError) => res.status(500).json({ error: err }));
-      } else {
-        res.status(404).json({ error: "Incorrect id format." });
-      }
+      BreadModel.findById(breadID)
+        .then((bread: Bread) => {
+          if (bread) {
+            res.status(200).json(bread);
+          } else {
+            res.status(404).json({ error: "Object doesn't exist.", breadID });
+          }
+        })
+        .catch((err: CallbackError) => res.status(500).json({ error: err }));
     } else {
       BreadModel.find()
         .then((breads: Bread[]) => res.status(200).json(breads))
@@ -33,7 +29,9 @@ class BreadsController {
     const bread = new BreadModel({ ...req.body, creator: req.params.userID });
     const errors = validationResult(req);
 
-    if (errors.isEmpty()) {
+    if (!errors.isEmpty()) {
+      res.status(422).json({ errors: errors.array() });
+    } else {
       bread
         .save()
         .then((bread) =>
@@ -42,8 +40,6 @@ class BreadsController {
         .catch((err: CallbackError) => {
           res.status(500).json({ error: err });
         });
-    } else {
-      return res.status(422).json({ errors: errors.array() });
     }
   };
 
@@ -51,51 +47,53 @@ class BreadsController {
     const breadID = { _id: req.params.breadID };
     const errors = validationResult(req);
 
-    if (errors.isEmpty()) {
-      if (breadID._id.length === 24) {
-        BreadModel.findOne(breadID).then((bread: Bread) => {
-          if (bread) {
-            if (bread.creator === req.params.userID) {
-              BreadModel.findOneAndUpdate(breadID, req.body, {
-                useFindAndModify: false,
-              })
-                .then(() => {
-                  res.status(201).json({
-                    message: "Updated successfully.",
-                    ...breadID,
-                    ...req.body,
-                  });
-                })
-                .catch((err: CallbackError) => {
-                  res.status(500).json({ error: err });
-                });
-            } else {
-              res.status(403).json({
-                error:
-                  "You are not allowed to modify objects of other creators.",
-              });
-            }
-          } else {
-            res
-              .status(404)
-              .json({ error: "Object doesn't exist.", ...breadID });
-          }
-        });
-      } else {
-        res.status(404).json({ error: "Incorrect id format." });
-      }
+    if (!errors.isEmpty()) {
+      res.status(422).json({ errors: errors.array() });
     } else {
-      return res.status(422).json({ errors: errors.array() });
+      BreadModel.findOne(breadID).then((bread: Bread) => {
+        if (!bread) {
+          res.status(404).json({ error: "Object doesn't exist.", ...breadID });
+        } else {
+          if (bread.creator !== req.params.userID) {
+            res.status(403).json({
+              error: "You are not allowed to modify objects of other creators.",
+            });
+          } else {
+            BreadModel.findOneAndUpdate(breadID, req.body, {
+              useFindAndModify: false,
+            })
+              .then(() => {
+                res.status(201).json({
+                  message: "Updated successfully.",
+                  ...breadID,
+                  ...req.body,
+                });
+              })
+              .catch((err: CallbackError) => {
+                res.status(500).json({ error: err });
+              });
+          }
+        }
+      });
     }
   };
 
   deleteHandler: RequestHandler = (req, res, next) => {
     const breadID = { _id: req.params.breadID };
+    const errors = validationResult(req);
 
-    if (breadID._id.length === 24) {
+    if (!errors.isEmpty()) {
+      res.status(422).json({ errors: errors.array() });
+    } else {
       BreadModel.findOne(breadID).then((bread: Bread) => {
-        if (bread) {
-          if (bread.creator === req.params.userID) {
+        if (!bread) {
+          res.status(404).json({ error: "Object doesn't exist.", ...breadID });
+        } else {
+          if (bread.creator !== req.params.userID) {
+            res.status(403).json({
+              error: "You are not allowed to modify objects of other creators.",
+            });
+          } else {
             BreadModel.findByIdAndDelete(breadID)
               .then(() => {
                 res
@@ -105,17 +103,9 @@ class BreadsController {
               .catch((err: CallbackError) => {
                 res.status(500).json({ error: err });
               });
-          } else {
-            res.status(403).json({
-              error: "You are not allowed to modify objects of other creators.",
-            });
           }
-        } else {
-          res.status(404).json({ error: "Object doesn't exist.", ...breadID });
         }
       });
-    } else {
-      res.status(404).json({ error: "Incorrect id format." });
     }
   };
 }
