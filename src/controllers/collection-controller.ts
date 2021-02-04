@@ -1,41 +1,58 @@
 import { RequestHandler } from "express";
 import { validationResult } from "express-validator";
-import { CallbackError } from "mongoose";
+import { CallbackError, Model } from "mongoose";
 
 import { Bread, BreadModel } from "../models/bread-model";
+import { Roll, RollModel } from "../models/roll-model";
 
-class BreadsController {
+export class CollectionController {
+  collection!: Model<any>;
+
+  constructor(reqCollection: "breads" | "rolls") {
+    if (reqCollection === "breads") {
+      this.collection = BreadModel;
+    }
+    if (reqCollection === "rolls") {
+      this.collection = RollModel;
+    }
+  }
+
   getHandler: RequestHandler = (req, res, next) => {
-    const breadID = req.params.breadID;
+    const itemID = req.params.itemID;
 
-    if (breadID) {
-      BreadModel.findById(breadID)
-        .then((bread: Bread) => {
-          if (bread) {
-            res.status(200).json(bread);
+    if (itemID) {
+      this.collection
+        .findById(itemID)
+        .then((item: Bread | Roll) => {
+          if (item) {
+            res.status(200).json(item);
           } else {
-            res.status(404).json({ error: "Object doesn't exist.", breadID });
+            res.status(404).json({ error: "Object doesn't exist.", itemID });
           }
         })
         .catch((err: CallbackError) => res.status(500).json({ error: err }));
     } else {
-      BreadModel.find()
-        .then((breads: Bread[]) => res.status(200).json(breads))
+      this.collection
+        .find()
+        .then((items: Bread[] | Roll[]) => res.status(200).json(items))
         .catch((err: CallbackError) => res.status(500).json({ error: err }));
     }
   };
 
   postHandler: RequestHandler = (req, res, next) => {
-    const bread = new BreadModel({ ...req.body, creator: req.params.userID });
+    const item = new this.collection({
+      ...req.body,
+      creator: req.params.userID,
+    });
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
       res.status(422).json({ errors: errors.array() });
     } else {
-      bread
+      item
         .save()
-        .then((bread) =>
-          res.status(201).json({ message: "Created successfully.", bread })
+        .then((item: Bread | Roll) =>
+          res.status(201).json({ message: "Created successfully.", item })
         )
         .catch((err: CallbackError) => {
           res.status(500).json({ error: err });
@@ -44,28 +61,29 @@ class BreadsController {
   };
 
   patchHandler: RequestHandler = (req, res, next) => {
-    const breadID = { _id: req.params.breadID };
+    const itemID = { _id: req.params.itemID };
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
       res.status(422).json({ errors: errors.array() });
     } else {
-      BreadModel.findOne(breadID).then((bread: Bread) => {
-        if (!bread) {
-          res.status(404).json({ error: "Object doesn't exist.", ...breadID });
+      this.collection.findOne(itemID).then((item: Bread | Roll) => {
+        if (!item) {
+          res.status(404).json({ error: "Object doesn't exist.", ...itemID });
         } else {
-          if (bread.creator !== req.params.userID) {
+          if (item.creator !== req.params.userID) {
             res.status(403).json({
               error: "You are not allowed to modify objects of other creators.",
             });
           } else {
-            BreadModel.findOneAndUpdate(breadID, req.body, {
-              useFindAndModify: false,
-            })
+            this.collection
+              .findOneAndUpdate(itemID, req.body, {
+                useFindAndModify: false,
+              })
               .then(() => {
                 res.status(201).json({
                   message: "Updated successfully.",
-                  ...breadID,
+                  ...itemID,
                   ...req.body,
                 });
               })
@@ -79,26 +97,27 @@ class BreadsController {
   };
 
   deleteHandler: RequestHandler = (req, res, next) => {
-    const breadID = { _id: req.params.breadID };
+    const itemID = { _id: req.params.itemID };
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
       res.status(422).json({ errors: errors.array() });
     } else {
-      BreadModel.findOne(breadID).then((bread: Bread) => {
-        if (!bread) {
-          res.status(404).json({ error: "Object doesn't exist.", ...breadID });
+      this.collection.findOne(itemID).then((item: Bread | Roll) => {
+        if (!item) {
+          res.status(404).json({ error: "Object doesn't exist.", ...itemID });
         } else {
-          if (bread.creator !== req.params.userID) {
+          if (item.creator !== req.params.userID) {
             res.status(403).json({
               error: "You are not allowed to modify objects of other creators.",
             });
           } else {
-            BreadModel.findByIdAndDelete(breadID)
+            this.collection
+              .findByIdAndDelete(itemID)
               .then(() => {
                 res
                   .status(200)
-                  .json({ message: "Deleted successfully.", ...breadID });
+                  .json({ message: "Deleted successfully.", ...itemID });
               })
               .catch((err: CallbackError) => {
                 res.status(500).json({ error: err });
@@ -109,5 +128,3 @@ class BreadsController {
     }
   };
 }
-
-export default new BreadsController();

@@ -64,7 +64,7 @@ class AuthController {
             );
 
             res.status(201).json({
-              message: "Signed up successfully.",
+              message: "New token created.",
               user: requestedUser,
               token: token,
             });

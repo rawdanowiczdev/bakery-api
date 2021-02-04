@@ -2,10 +2,11 @@ import { Router } from "express";
 import { body, param } from "express-validator";
 
 import { isAuth } from "../config/auth";
-import breadsController from "../controllers/breads-controller";
+import { CollectionController } from "../controllers/collection-controller";
 
 class BreadsRoutes {
   router = Router();
+  collection = new CollectionController("breads");
 
   constructor() {
     this.get();
@@ -15,11 +16,11 @@ class BreadsRoutes {
   }
 
   get(): void {
-    this.router.get("/", breadsController.getHandler);
+    this.router.get("/", this.collection.getHandler);
     this.router.get(
-      "/:breadID",
-      param("breadID").isLength({ min: 24, max: 24 }),
-      breadsController.getHandler
+      "/:itemID",
+      param("itemID").isLength({ min: 24, max: 24 }),
+      this.collection.getHandler
     );
   }
 
@@ -31,31 +32,31 @@ class BreadsRoutes {
       body("description").trim().isLength({ min: 5, max: 500 }),
       body("grains").isArray({ min: 1, max: 10 }),
       body("imageURL").isURL({ protocols: ["https"] }),
-      breadsController.postHandler
+      this.collection.postHandler
     );
   }
 
   patch(): void {
     this.router.patch(
-      "/:breadID",
+      "/:itemID",
       isAuth,
-      param("breadID").isLength({ min: 24, max: 24 }),
+      param("itemID").isLength({ min: 24, max: 24 }),
       body("name").trim().isLength({ min: 3, max: 30 }).optional(),
       body("description").trim().isLength({ min: 5, max: 500 }).optional(),
       body("grains").isArray({ min: 1, max: 10 }).optional(),
       body("imageURL")
         .isURL({ protocols: ["https"] })
         .optional(),
-      breadsController.patchHandler
+      this.collection.patchHandler
     );
   }
 
   delete(): void {
     this.router.delete(
-      "/:breadID",
+      "/:itemID",
       isAuth,
-      param("breadID").isLength({ min: 24, max: 24 }),
-      breadsController.deleteHandler
+      param("itemID").isLength({ min: 24, max: 24 }),
+      this.collection.deleteHandler
     );
   }
 }
