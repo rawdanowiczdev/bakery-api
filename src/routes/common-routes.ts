@@ -7,10 +7,15 @@ class CommonRoutes {
 
   constructor() {
     this.notFound();
+    this.baseRoute();
   }
 
   notFound(): void {
     this.router.all("*", commonController.notFoundHandler);
+  }
+
+  baseRoute(): void {
+    this.router.get("", commonController.baseRouteHandler);
   }
 }
 
