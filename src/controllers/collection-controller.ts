@@ -6,14 +6,14 @@ import { Bread, BreadModel } from "../models/bread-model";
 import { Roll, RollModel } from "../models/roll-model";
 
 export class CollectionController {
-  collection!: Model<any>;
+  model!: Model<any>;
 
-  constructor(reqCollection: "breads" | "rolls") {
-    if (reqCollection === "breads") {
-      this.collection = BreadModel;
+  constructor(requestedModel: "breads" | "rolls") {
+    if (requestedModel === "breads") {
+      this.model = BreadModel;
     }
-    if (reqCollection === "rolls") {
-      this.collection = RollModel;
+    if (requestedModel === "rolls") {
+      this.model = RollModel;
     }
   }
 
@@ -21,7 +21,7 @@ export class CollectionController {
     const itemID = req.params.itemID;
 
     if (itemID) {
-      this.collection
+      this.model
         .findById(itemID)
         .then((item: Bread | Roll) => {
           if (item) {
@@ -32,7 +32,7 @@ export class CollectionController {
         })
         .catch((err: CallbackError) => res.status(500).json({ error: err }));
     } else {
-      this.collection
+      this.model
         .find()
         .then((items: Bread[] | Roll[]) => res.status(200).json(items))
         .catch((err: CallbackError) => res.status(500).json({ error: err }));
@@ -40,7 +40,7 @@ export class CollectionController {
   };
 
   postHandler: RequestHandler = (req, res, next) => {
-    const item = new this.collection({
+    const item = new this.model({
       ...req.body,
       creator: req.params.userID,
     });
@@ -67,7 +67,7 @@ export class CollectionController {
     if (!errors.isEmpty()) {
       res.status(422).json({ errors: errors.array() });
     } else {
-      this.collection.findOne(itemID).then((item: Bread | Roll) => {
+      this.model.findOne(itemID).then((item: Bread | Roll) => {
         if (!item) {
           res.status(404).json({ error: "Object doesn't exist.", ...itemID });
         } else {
@@ -76,7 +76,7 @@ export class CollectionController {
               error: "You are not allowed to modify objects of other creators.",
             });
           } else {
-            this.collection
+            this.model
               .findOneAndUpdate(itemID, req.body, {
                 useFindAndModify: false,
               })
@@ -103,7 +103,7 @@ export class CollectionController {
     if (!errors.isEmpty()) {
       res.status(422).json({ errors: errors.array() });
     } else {
-      this.collection.findOne(itemID).then((item: Bread | Roll) => {
+      this.model.findOne(itemID).then((item: Bread | Roll) => {
         if (!item) {
           res.status(404).json({ error: "Object doesn't exist.", ...itemID });
         } else {
@@ -112,7 +112,7 @@ export class CollectionController {
               error: "You are not allowed to modify objects of other creators.",
             });
           } else {
-            this.collection
+            this.model
               .findByIdAndDelete(itemID)
               .then(() => {
                 res
