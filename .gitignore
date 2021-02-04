@@ -3,6 +3,7 @@
 
 # contains sensitive data
 .env
+ecosystem.config.js
 
 # tsc output folder
 /dist
