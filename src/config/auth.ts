@@ -1,6 +1,8 @@
 import { RequestHandler } from "express";
 import jtw from "jsonwebtoken";
-import { User } from "../models/user-model";
+import { CallbackError } from "mongoose";
+
+import { User, UserModel } from "../models/user-model";
 
 export const isAuth: RequestHandler = (req, res, next) => {
   const authHeader = req.get("Authorization");
@@ -12,17 +14,22 @@ export const isAuth: RequestHandler = (req, res, next) => {
         authHeader.split(" ")[1],
         process.env.JWT_SECRET as string
       );
+
+      const { _id } = token.user;
+      UserModel.findById(_id)
+        .then((user: User) => {
+          if (user) {
+            req.params.userID = _id;
+            next();
+          } else {
+            res.status(401).json({ error: "Invalid token." });
+          }
+        })
+        .catch((err: CallbackError) => res.status(500).json({ error: err }));
     } catch (err) {
       res.status(401).json({ error: err });
     }
-
-    if (token) {
-      req.params.userID = token.user._id;
-      next();
-    }
   } else {
-    res
-      .status(401)
-      .json({ error: "Missing authorization token. Signup to create one." });
+    res.status(401).json({ error: "Missing authorization token." });
   }
 };

@@ -9,6 +9,7 @@ class AuthRoutes {
 
   constructor() {
     this.signup();
+    this.resend();
   }
 
   signup(): void {
@@ -19,11 +20,29 @@ class AuthRoutes {
         .custom((value) => {
           return UserModel.findOne({ email: value }).then((user: User) => {
             if (user) {
-              throw new Error("This email already exists.");
+              throw new Error("User already exists.");
             }
           });
         }),
+      body("password").isLength({ min: 6, max: 20 }),
       authController.signupHandler
+    );
+  }
+
+  resend(): void {
+    this.router.post(
+      "/resend",
+      body("email")
+        .isEmail()
+        .custom((value) => {
+          return UserModel.findOne({ email: value }).then((user: User) => {
+            if (!user) {
+              throw new Error("User doesn't exists.");
+            }
+          });
+        }),
+      body("password").isLength({ min: 6, max: 20 }),
+      authController.resendHandler
     );
   }
 }
